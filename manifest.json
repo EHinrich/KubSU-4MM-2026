@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "Internet Surfing Summarization",
+  "description": "So what were you doing on the internet today?",
+  "version": "1.0",
+  "action": {
+    "default_popup": "popup/popup.html"
+  },
+  "content_scripts": [
+    {
+      "js": [
+        "content-script.js"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ],
+  "background": {
+    "service_worker": "service-worker.js"
+  }
+}
