@@ -4,7 +4,15 @@ function parseTextContent(maxLen) {
   if (!document.body?.innerText) {
     return "";
   }
-  return document.body.innerText.trim().slice(0, maxLen);
+  content = document.body.innerText.trim().slice(0, maxLen);
+  headers = document.querySelectorAll("h1, h2, h3, h4")
+  return Array.from(headers).map(element => 
+    {
+      const clone = element.cloneNode(true)
+      clone.removeAttribute("class")
+      clone.removeAttribute("style")
+      return clone.outerHTML
+    }).join(' ') + "   " + content
 }
 
 window.addEventListener('load', (event) => {
