@@ -21,7 +21,6 @@ $ python main.py
 ```
 ```bash
 $ pip install "fastapi[standard]"
-$ pip freeze > requirements.txt
 ```
 ```bash
 $ fastapi dev main.py
@@ -45,4 +44,7 @@ $ mypy .
 ```bash
 $ pip install pytest
 $ pytest
+```
+```bash
+$ pip freeze > requirements.txt
 ```

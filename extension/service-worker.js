@@ -23,5 +23,18 @@ chrome.runtime.onMessage.addListener(async (message) => {
   }
 
   const payload = buildPayload(message);
-  console.log("Sending payload", payload); // TODO Send to Backend API
+  console.log("Sending payload", payload);
+
+  try {
+    const response = await fetch("http://127.0.0.1:8000/page-view", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+    console.log("Response status:", response.status);
+  } catch (error) {
+    console.error("Failed to send payload:", error);
+  }
 });
