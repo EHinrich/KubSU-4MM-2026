@@ -10,9 +10,7 @@ repos:
     rev: v1.19.1
     hooks:
       - id: mypy
-        additional_dependencies:
-        - requests
-        - types-requests
+        additional_dependencies: [types-requests]
 
   - repo: local
     hooks:
