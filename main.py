@@ -20,8 +20,10 @@ class PageView(BaseModel):
     text: str
     timestamp: str
 
+
 class LlmRequest(BaseModel):
     prompt: str
+
 
 def init_db():
     with closing(sqlite3.connect(DB_PATH)) as conn:
