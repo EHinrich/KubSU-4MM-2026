@@ -10,3 +10,14 @@ repos:
     rev: v1.19.1
     hooks:
       - id: mypy
+        additional_dependencies: [types-requests]
+
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest
+        entry: ./.venv/bin/pytest tests
+        language: system
+        types: [python]
+        pass_filenames: false
+        always_run: true
