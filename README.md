@@ -48,3 +48,8 @@ $ pytest
 ```bash
 $ pip freeze > requirements.txt
 ```
+
+# OLLAMA
+```bash
+$ docker compose -f docker-compose.ollama.yml up -d
+```
