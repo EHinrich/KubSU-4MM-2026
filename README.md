@@ -52,4 +52,7 @@ $ pip freeze > requirements.txt
 # OLLAMA
 ```bash
 $ docker compose -f docker-compose.ollama.yml up -d
+$ docker exec -it ollama ollama run deepseek-r1:1.5b
+$ docker exec -it ollama ollama run deepseek-r1:7b
+$ docker compose -f docker-compose.ollama.yml down
 ```

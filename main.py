@@ -2,6 +2,7 @@ import logging
 import sqlite3
 from contextlib import closing
 
+import requests
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -19,6 +20,8 @@ class PageView(BaseModel):
     text: str
     timestamp: str
 
+class LlmRequest(BaseModel):
+    prompt: str
 
 def init_db():
     with closing(sqlite3.connect(DB_PATH)) as conn:
@@ -91,3 +94,16 @@ def page_view(page_view: PageView):
     logger.info("Page view saved to database")
 
     return {"status": "ok"}
+
+
+@app.post("/my-chat-gpt")
+def llm_proxy(req: LlmRequest):
+    response = requests.post(
+        "http://localhost:11434/api/generate",
+        json={
+            "model": "deepseek-r1:1.5b",
+            "prompt": req.prompt,
+            "stream": False,
+        },
+    )
+    return response.json().get("response")
