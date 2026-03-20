@@ -18,6 +18,7 @@ class PageView(BaseModel):
     title: str
     lang: str
     text: str
+    headers: str
     timestamp: str
 
 
@@ -35,6 +36,7 @@ def init_db():
                 title TEXT NOT NULL,
                 lang TEXT NOT NULL,
                 text TEXT NOT NULL,
+                headers TEXT NOT NULL,
                 timestamp TEXT NOT NULL,
                 processed BOOLEAN DEFAULT FALSE
             )
@@ -47,14 +49,15 @@ def save_page_view(page_view: PageView):
     with closing(sqlite3.connect(DB_PATH)) as conn:
         conn.execute(
             """
-            INSERT INTO page_views (url, title, lang, text, timestamp)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO page_views (url, title, lang, text, headers, timestamp)
+            VALUES (?, ?, ?, ?, ?, ?)
             """,
             (
                 page_view.url,
                 page_view.title,
                 page_view.lang,
                 page_view.text,
+                page_view.headers,
                 page_view.timestamp,
             ),
         )
@@ -90,6 +93,7 @@ def page_view(page_view: PageView):
     logger.info("Lang:      %s", page_view.lang)
     logger.info("Timestamp: %s", page_view.timestamp)
     logger.info("Text:      %s...", page_view.text[:100])
+    logger.info("Headers:   %s...", page_view.headers[:100])
     logger.info("=" * 60)
 
     save_page_view(page_view)
@@ -98,13 +102,37 @@ def page_view(page_view: PageView):
     return {"status": "ok"}
 
 
-@app.post("/my-chat-gpt")
+@app.post("/request")
 def llm_proxy(req: LlmRequest):
     response = requests.post(
         "http://localhost:11434/api/generate",
         json={
             "model": "deepseek-r1:1.5b",
             "prompt": req.prompt,
+            "system": "Отвечай на русском и будь токсичен!",
+            "temperature": 0.9,
+            "stream": False,
+        },
+    )
+    return response.json().get("response")
+
+
+@app.get("/history")
+def history():
+    with closing(sqlite3.connect(DB_PATH)) as conn:
+        rows = conn.execute("SELECT headers FROM page_views ORDER BY id ASC").fetchall()
+        prompt = "\n".join(row[0] for row in rows)
+
+    print(prompt)
+
+    response = requests.post(
+        "http://localhost:11434/api/generate",
+        json={
+            "model": "deepseek-r1:1.5b",
+            "prompt": "Дай сводку посещенных веб-сайтов на основе их заголовков: "
+            + prompt,
+            "system": "Отвечай на русском и будь токсичен!",
+            "temperature": 0.5,
             "stream": False,
         },
     )

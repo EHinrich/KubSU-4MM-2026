@@ -1,18 +1,18 @@
 const MAX_TEXT_LENGTH = 1_000;
 
-function parseTextContent(maxLen) {
+function getBodyText(maxLen) {
   if (!document.body?.innerText) {
     return "";
   }
-  content = document.body.innerText.trim().slice(0, maxLen);
-  headers = document.querySelectorAll("h1, h2, h3, h4")
-  return Array.from(headers).map(element => 
-    {
-      const clone = element.cloneNode(true)
-      clone.removeAttribute("class")
-      clone.removeAttribute("style")
-      return clone.outerHTML
-    }).join(' ') + "   " + content
+  return document.body.innerText.trim().slice(0, maxLen);
+}
+
+function getTextBySelectors(selectors) {
+  const headers = [];
+  document.querySelectorAll(selectors).forEach((header) => {
+    headers.push(header.innerText.trim());
+  });
+  return headers.join(".");
 }
 
 window.addEventListener('load', (event) => {
@@ -21,7 +21,8 @@ window.addEventListener('load', (event) => {
     url: location.href,
     title: document.title || "",
     lang: document.documentElement?.lang || "",
-    text: parseTextContent(MAX_TEXT_LENGTH)
+    text: getBodyText(MAX_TEXT_LENGTH),
+    headers: getTextBySelectors("h1")
   };
 
   chrome.runtime.sendMessage(payload);

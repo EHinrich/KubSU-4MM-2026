@@ -1,5 +1,28 @@
 <html>
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="popup.css"/>
+</head>
 <body>
-<h1>Hello, World!</h1>
+<div class="container">
+  <h2>Отправить запрос</h2>
+  <div class="input-group">
+    <input type="text" id="queryInput" placeholder="Введите текст..."/>
+    <button id="sendButton">Отправить</button>
+  </div>
+</div>
+
+<div class="container">
+  <h2>История серфинга</h2>
+  <div class="input-group">
+    <button id="historyButton">Получить сводку</button>
+  </div>
+</div>
+
+<div class="container">
+  <div id="response"></div>
+</div>
+
+<script src="popup.js"></script>
 </body>
 </html>
