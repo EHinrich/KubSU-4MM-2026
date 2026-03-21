@@ -41,24 +41,29 @@ async function sendRequest() {
 historyButton.addEventListener("click", () => loadHistory());
 
 async function loadHistory() {
-  historyButton.disabled = true;
   responseDiv.style.display = "block";
   responseDiv.textContent = "Загрузка...";
 
   try {
-    const res = await fetch(`${API_URL}/history`, {
-      method: "GET"
-    });
+    const res = await fetch(`${API_URL}/history`);
 
     if (!res.ok) {
       throw new Error(`Ошибка: ${res.status} ${res.statusText}`);
     }
 
     const data = await res.json();
-    responseDiv.textContent = JSON.stringify(data, null, 2);
+    responseDiv.innerHTML = `
+        <h2>Сводка</h2>
+        <p id="text"></p>
+
+        <h3>Изображение</h3>
+        <img id="img" style="max-width:512px; border-radius:10px;" />
+    `;
+
+    document.getElementById("text").textContent = data.text;
+
+    document.getElementById("img").src = data.image;
   } catch (err) {
     responseDiv.textContent = `Ошибка: ${err.message}`;
-  } finally {
-    historyButton.disabled = false;
   }
 }

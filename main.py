@@ -121,19 +121,49 @@ def llm_proxy(req: LlmRequest):
 def history():
     with closing(sqlite3.connect(DB_PATH)) as conn:
         rows = conn.execute("SELECT headers FROM page_views ORDER BY id ASC").fetchall()
-        prompt = "\n".join(row[0] for row in rows)
+        prompt_text = "\n".join(row[0] for row in rows)
 
-    print(prompt)
-
-    response = requests.post(
+    deepseek_response = requests.post(
         "http://localhost:11434/api/generate",
         json={
             "model": "deepseek-r1:1.5b",
-            "prompt": "Дай сводку посещенных веб-сайтов на основе их заголовков: "
-            + prompt,
+            "prompt": f"Дай сводку посещенных сайтов: {prompt_text}",
             "system": "Отвечай на русском и будь токсичен!",
-            "temperature": 0.5,
             "stream": False,
         },
-    )
-    return response.json().get("response")
+    ).json()
+    text_response = deepseek_response.get("response") or deepseek_response.get(
+        "message", {}
+    ).get("content")
+
+    prompt_response = requests.post(
+        "http://localhost:11434/api/generate",
+        json={
+            "model": "deepseek-r1:1.5b",
+            "prompt": f"Short prompt for visualisation (up to 15 words): {text_response}",
+            "stream": False,
+        },
+    ).json()
+
+    sd_prompt = prompt_response.get("response") or prompt_response.get(
+        "message", {}
+    ).get("content")
+
+    sd_url = "http://127.0.0.1:7860/sdapi/v1/txt2img"
+    sd_payload = {"prompt": sd_prompt, "steps": 20, "width": 512, "height": 512}
+
+    try:
+        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+
+        sd_response = requests.request(
+            method="POST", url=sd_url, json=sd_payload, headers=headers
+        ).json()
+
+        image_base64 = sd_response.get("images", [None])[0]
+
+        if not image_base64:
+            return {"error": "SD returned no image", "debug": sd_response}
+
+        return {"text": text_response, "image": f"data:image/png;base64,{image_base64}"}
+    except Exception as e:
+        return {"error": str(e)}
